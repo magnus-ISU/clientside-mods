@@ -1,0 +1,12 @@
+*
+!*/
+
+!mods/*
+
+!resourcepacks/*
+
+!config/
+!config/inventoryhud.json
+
+!.gitignore
+!README.md
