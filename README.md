@@ -1,6 +1,6 @@
 # Minecraft mods I use
 
-This pack contains the (clientside) mods I prefer to play with.
+This pack contains the (clientside) mods I prefer to play with, along with some cool resource packs
 
 ## Github for dummies
 
