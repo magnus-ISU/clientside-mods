@@ -1,6 +1,6 @@
 {
 	"dynamicOnLoad": true,
-	"ticksRevealed": 150,
+	"ticksRevealed": 100,
 	"animationType": "Fade",
 	"animationSpeed": 5.0,
 	"revealType": "Stacked",
