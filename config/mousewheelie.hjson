@@ -5,7 +5,7 @@
 		// Lower numbers increase the speed but might be rejected by servers.
 		// default: 10
 		// 	Must be greater or equal to 1
-		interaction-rate: 10
+		interaction-rate: 20
 		// Enables using armor/elytra items to swap them with the currently equipped item.
 		// default: true
 		enable-quick-armor-swapping: true
