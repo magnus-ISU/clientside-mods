@@ -310,7 +310,7 @@ _version = 1
 			#
 			# This setting shouldn't affect performance. 
 			#
-			vanillaOverdraw = "DYNAMIC"
+			vanillaOverdraw = "ALWAYS"
 			# Will prevent some overdraw issues, but may cause nearby fake chunks to render incorrectly 
 			# especially when in/near an ocean. 
 			#
