@@ -105,5 +105,17 @@
     "defaultValue": 100,
     "minValue": 0,
     "maxValue": 100
+  },
+  "durabilityviewer.config.showarmoricons": {
+    "key": "Show durability of armor",
+    "toolTip": "durabilityviewer.config.tt.showfreeslots",
+    "value": true,
+    "defaultValue": true
+  },
+  "durabilityviewer.config.showtoolicon": {
+    "key": "Show tools and arrows when applicable",
+    "toolTip": "durabilityviewer.config.tt.showfreeslots",
+    "value": false,
+    "defaultValue": true
   }
 }
