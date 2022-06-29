@@ -95,7 +95,7 @@
 			equal-items: false
 			// Try to find equal stacks (nbt matching
 			// default: true
-			equal-stacks: true
+			equal-stacks: false
 		}
 	}
 	// Configure picking the correct tool for the currently faced block.
