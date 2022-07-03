@@ -29,7 +29,7 @@
       "keys": "A,D"
     },
     "dropAllMatching": {
-      "keys": "LEFT_CONTROL,LEFT_SHIFT,Q"
+      "keys": "LEFT_ALT,Q"
     },
     "massCraft": {
       "keys": "A,F"
@@ -59,7 +59,7 @@
       "keys": "LEFT_ALT"
     },
     "modifierMoveStack": {
-      "keys": "LEFT_SHIFT"
+      "keys": "BUTTON_1"
     },
     "modifierToggleVillagerGlobalFavorite": {
       "keys": "LEFT_SHIFT"
