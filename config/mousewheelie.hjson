@@ -60,19 +60,19 @@
 	refill: {
 		// Refills stacks in the off hand
 		// default: true
-		off-hand: true
+		off-hand: false
 		// Refill when eating items
 		// default: true
-		eat: true
+		eat: false
 		// Refill when dropping items
 		// default: true
-		drop: true
+		drop: false
 		// Refill when using up items
 		// default: true
-		use: true
+		use: false
 		// Refill on other occasions
 		// default: true
-		other: true
+		other: false
 		// Enable/Disable specific rules for how to refill items
 		rules: {
 			// Tries to find any block items
