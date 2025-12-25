@@ -352,7 +352,7 @@ def download_mod(
 
         filename: str = file_to_download["filename"]
         filename_parts = filename.split(".")
-        # filename_parts.insert(-1, mod_id)
+        filename_parts.insert(-1, mod_id)
         filename_with_id = ".".join(filename_parts)
         file_path = os.path.join(directory, filename_with_id)
 
