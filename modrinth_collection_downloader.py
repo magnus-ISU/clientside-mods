@@ -204,31 +204,6 @@ def extract_mod_id_from_file(file_path: str, loader: str) -> Optional[str]:
     return None
 
 
-def get_existing_mods(directory: str, loader: str) -> Dict[str, Dict[str, str]]:
-    """Get existing mods from the directory by extracting mod IDs from JAR files.
-    
-    Returns a dictionary mapping mod_id to mod info dict.
-    """
-    if not os.path.exists(directory):
-        return {}
-    
-    existing_mods: Dict[str, Dict[str, str]] = {}
-    try:
-        for item in os.listdir(directory):
-            if not item.endswith('.jar'):
-                continue
-            item_path = os.path.join(directory, item)
-            if not os.path.isfile(item_path):
-                continue
-            mod_id = extract_mod_id_from_file(item_path, loader)
-            if mod_id:
-                existing_mods[mod_id] = {"id": mod_id, "filename": item}
-    except OSError as e:
-        print(f"Warning: Failed to read directory '{directory}': {e}")
-    
-    return existing_mods
-
-
 def get_mod_name(modrinth_client: ModrinthClient, mod_id: str) -> str:
     """Get the mod name (title or slug) for display purposes."""
     project_data = modrinth_client.get_mod_project(mod_id)
@@ -265,7 +240,6 @@ def download_mod(
     version: str,
     loader: str,
     update: bool,
-    existing_mods: Dict[str, Dict[str, str]],
     stats: Dict[str, int],
     failed_mods: List[str],
     processed_mods: Optional[set] = None,
@@ -295,13 +269,32 @@ def download_mod(
     dep_prefix = "  [DEPENDENCY] " if is_dependency else ""
     
     try:
-        existing_mod = existing_mods.get(mod_id)
-
-        # Early skip - no need to fetch mod name
-        if not update and existing_mod:
+        # Get project data to get slug
+        project_data = modrinth_client.get_mod_project(mod_id)
+        if project_data:
+            slug = project_data.get("slug", mod_id)
+        else:
+            slug = mod_id
+        
+        normalized_slug = slug.replace("-", "").lower()
+        
+        # Find existing filename by matching normalized filename start
+        existing_filename = None
+        try:
+            for item in os.listdir(directory):
+                if item.endswith('.jar'):
+                    normalized_item = item.replace("-", "").lower()
+                    if normalized_item.startswith(normalized_slug):
+                        existing_filename = item
+                        break
+        except OSError as e:
+            print(f"Warning: Failed to scan directory '{directory}': {e}")
+        
+        # Early skip if not updating and exists
+        if not update and existing_filename:
+            mod_name = get_mod_name(modrinth_client, mod_id)
+            mod_display = f"{mod_name} ({mod_id})" if mod_name != mod_id else mod_id
             if is_dependency:
-                mod_name = get_mod_name(modrinth_client, mod_id)
-                mod_display = f"{mod_name} ({mod_id})" if mod_name != mod_id else mod_id
                 print(f"{dep_prefix}SKIP: {mod_display} already exists (use -u/--update to update)")
             else:
                 print(f"SKIP: {mod_id} already exists (use -u/--update to update)")
@@ -315,7 +308,7 @@ def download_mod(
             if latest_mod:
                 _process_dependencies(
                     latest_mod, modrinth_client, directory, version, loader,
-                    update, existing_mods, stats, failed_mods, processed_mods, mod_id
+                    update, stats, failed_mods, processed_mods, mod_id
                 )
             return
 
@@ -347,7 +340,7 @@ def download_mod(
         
         _process_dependencies(
             latest_mod, modrinth_client, directory, version, loader,
-            update, existing_mods, stats, failed_mods, processed_mods, mod_id
+            update, stats, failed_mods, processed_mods, mod_id
         )
 
         # Find primary file
@@ -370,11 +363,11 @@ def download_mod(
         filename: str = file_to_download["filename"]
         file_path = os.path.join(directory, filename)
 
-        # Skip if already at latest version - check both existing_mods dict and disk
-        if existing_mod and existing_mod["filename"] == filename:
+        # Skip if already at latest version
+        if existing_filename and existing_filename == filename:
+            mod_name = get_mod_name(modrinth_client, mod_id)
+            mod_display = f"{mod_name} ({mod_id})" if mod_name != mod_id else mod_id
             if is_dependency:
-                mod_name = get_mod_name(modrinth_client, mod_id)
-                mod_display = f"{mod_name} ({mod_id})" if mod_name != mod_id else mod_id
                 print(f"{dep_prefix}SKIP: {mod_display} ({filename}) latest version already exists")
             else:
                 print(f"SKIP: {mod_id} ({filename}) latest version already exists")
@@ -385,12 +378,11 @@ def download_mod(
                 stats["main_skipped"] = stats.get("main_skipped", 0) + 1
             return
         
-        # Also check if file exists on disk with same name (might have been downloaded as a dependency)
-        # Only skip if it's the exact same version and we're not in update mode
+        # Also check if file exists on disk with same name
         if os.path.exists(file_path) and not update:
+            mod_name = get_mod_name(modrinth_client, mod_id)
+            mod_display = f"{mod_name} ({mod_id})" if mod_name != mod_id else mod_id
             if is_dependency:
-                mod_name = get_mod_name(modrinth_client, mod_id)
-                mod_display = f"{mod_name} ({mod_id})" if mod_name != mod_id else mod_id
                 print(f"{dep_prefix}SKIP: {mod_display} ({filename}) already exists on disk")
             else:
                 print(f"SKIP: {mod_id} ({filename}) already exists on disk")
@@ -404,7 +396,7 @@ def download_mod(
         # We're actually downloading/updating - fetch mod name for display
         mod_name = get_mod_name(modrinth_client, mod_id)
         mod_display = f"{mod_name} ({mod_id})" if mod_name != mod_id else mod_id
-        action = "UPDATING" if existing_mod else "DOWNLOADING"
+        action = "UPDATING" if existing_filename else "DOWNLOADING"
         loaders_str = ", ".join(latest_mod.get("loaders", []))
         versions_str = ", ".join(latest_mod.get("game_versions", []))
         if is_dependency and parent_mod_id:
@@ -422,9 +414,20 @@ def download_mod(
 
         # Check for filename collision
         if os.path.exists(file_path):
-            existing_id = extract_mod_id_from_file(file_path, loader)
-            if existing_id and existing_id != mod_id:
-                print(f"{dep_prefix}ERROR: Filename collision! {filename} is already used by mod {existing_id}")
+            existing_internal = extract_mod_id_from_file(file_path, loader)
+            if existing_internal:
+                normalized_existing = existing_internal.replace("-", "").replace("_", "").lower()
+                if normalized_existing != normalized_slug:
+                    print(f"{dep_prefix}ERROR: Filename collision! {filename} is already used by mod {existing_internal}")
+                    stats["failed"] += 1
+                    if is_dependency:
+                        stats["deps_failed"] = stats.get("deps_failed", 0) + 1
+                    else:
+                        stats["main_failed"] = stats.get("main_failed", 0) + 1
+                    failed_mods.append(mod_display)
+                    return
+            else:
+                print(f"{dep_prefix}WARNING: Could not extract id from existing {filename}, assuming collision")
                 stats["failed"] += 1
                 if is_dependency:
                     stats["deps_failed"] = stats.get("deps_failed", 0) + 1
@@ -448,22 +451,22 @@ def download_mod(
             failed_mods.append(mod_display)
             return
 
-        # Only remove old file if download succeeded
-        if existing_mod:
-            old_file_path = os.path.join(directory, existing_mod["filename"])
+        # Only remove old file if download succeeded and it's different
+        if existing_filename and existing_filename != filename:
+            old_file_path = os.path.join(directory, existing_filename)
             try:
                 if os.path.exists(old_file_path):
                     os.remove(old_file_path)
-                    print(f"{dep_prefix}REMOVED: Previous version {existing_mod['filename']} for {mod_display}")
+                    print(f"{dep_prefix}REMOVED: Previous version {existing_filename} for {mod_display}")
             except OSError as e:
-                print(f"{dep_prefix}WARNING: Failed to remove old file {existing_mod['filename']} for {mod_display}: {e}")
+                print(f"{dep_prefix}WARNING: Failed to remove old file {existing_filename} for {mod_display}: {e}")
 
         stats["downloaded"] += 1
         if is_dependency:
             stats["deps_downloaded"] = stats.get("deps_downloaded", 0) + 1
         else:
             stats["main_downloaded"] = stats.get("main_downloaded", 0) + 1
-        if existing_mod:
+        if existing_filename:
             stats["updated"] += 1
             if is_dependency:
                 stats["deps_updated"] = stats.get("deps_updated", 0) + 1
@@ -493,7 +496,6 @@ def _process_dependencies(
     version: str,
     loader: str,
     update: bool,
-    existing_mods: Dict[str, Dict[str, str]],
     stats: Dict[str, int],
     failed_mods: List[str],
     processed_mods: set,
@@ -528,7 +530,6 @@ def _process_dependencies(
             version,
             loader,
             update,
-            existing_mods,
             stats,
             failed_mods,
             processed_mods,
@@ -564,7 +565,6 @@ def main():
         return
 
     print(f"Found {len(mods)} mod(s) in collection")
-    existing_mods = get_existing_mods(args.directory, args.loader)
 
     # Statistics tracking
     stats = {
@@ -587,7 +587,6 @@ def main():
                 args.version,
                 args.loader,
                 args.update,
-                existing_mods,
                 stats,
                 failed_mods,
             )
