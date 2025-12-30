@@ -1,6 +1,6 @@
 filename = 'iris-fabric-1.10.4+mc1.21.11.jar'
-name = 'Iris'
-side = 'both'
+name = 'Iris Shaders'
+side = 'client'
 x-prismlauncher-loaders = [ 'quilt', 'fabric' ]
 x-prismlauncher-mc-versions = [ '1.21.11' ]
 x-prismlauncher-release-type = 'release'

@@ -1,6 +1,6 @@
 filename = 'sodium-fabric-0.8.2+mc1.21.11.jar'
 name = 'Sodium'
-side = 'both'
+side = 'client'
 x-prismlauncher-loaders = [ 'quilt', 'fabric' ]
 x-prismlauncher-mc-versions = [ '1.21.11' ]
 x-prismlauncher-release-type = 'release'

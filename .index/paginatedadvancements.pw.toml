@@ -1,6 +1,6 @@
 filename = 'paginatedadvancements-2.8.0+1.21.11.jar'
-name = 'Paginated Advancements'
-side = 'both'
+name = 'Paginated Advancements & Custom Frames'
+side = 'client'
 x-prismlauncher-loaders = [ 'fabric' ]
 x-prismlauncher-mc-versions = [ '1.21.11' ]
 x-prismlauncher-release-type = 'release'
