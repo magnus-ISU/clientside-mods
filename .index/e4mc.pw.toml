@@ -1,4 +1,4 @@
-filename = 'e4mc_minecraft-fabric-5.5.2.jar'
+filename = 'e4mc-fabric-6.0.6.jar'
 name = 'e4mc'
 side = 'both'
 x-prismlauncher-loaders = [ 'quilt', 'fabric' ]
@@ -34,11 +34,11 @@ x-prismlauncher-mc-versions = [
 x-prismlauncher-release-type = 'release'
 
 [download]
-hash = 'f3a1c469b9e327fff0f96abebb003a7328fbd8ea5addf2614552fb8c4e4780883554d195f00fdf324d1e9db524e448f743687abe1d77270d3787707de3e33fd4'
+hash = 'c171e4d8eab6bcd4cfc8f685a4766334ba8cf7feeb1ef19fb52562e144cdf8dcbf4f206e4b4e7e6d8194688c49490d41c7b9a0296ae9f37d2272189382ebe1eb'
 hash-format = 'sha512'
 mode = 'url'
-url = 'https://cdn.modrinth.com/data/qANg5Jrr/versions/JPYJkSky/e4mc_minecraft-fabric-5.5.2.jar'
+url = 'https://cdn.modrinth.com/data/qANg5Jrr/versions/JSmcqwxn/e4mc-fabric-6.0.6.jar'
 
 [update.modrinth]
 mod-id = 'qANg5Jrr'
-version = 'JPYJkSky'
+version = 'JSmcqwxn'
